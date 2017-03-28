@@ -237,12 +237,18 @@ class BNO055(object):
                                          writeTimeout=serial_timeout_sec)
         else:
             # Use I2C if no serial port is provided.
-            # Assume we're using platform's default I2C bus if none is specified.
-            if i2c is None:
-                import Adafruit_GPIO.I2C as I2C
-                i2c = I2C
+            i2c_busnum = i2c
+            import Adafruit_GPIO.I2C as I2C
+            i2c = I2C
+
             # Save a reference to the I2C device instance for later communication.
-            self._i2c_device = i2c.get_i2c_device(address, **kwargs)
+            if i2c_busnum is not None:
+                 self._i2c_device = i2c.get_i2c_device(address, busnum=i2c_busnum, **kwargs)
+
+            else:
+                # Save a reference to the I2C device instance for later communication.
+                # Assume we're using platform's default I2C bus if none is specified.
+                self._i2c_device = i2c.get_i2c_device(address, **kwargs)
 
     def _serial_send(self, command, ack=True, max_attempts=5):
         # Send a serial command and automatically handle if it needs to be resent
